@@ -6,7 +6,6 @@ Artillery
 
 ```bash
 npm install -g artillery@1.6
-npm install faker
 ```
 ### Go into project directory
 ```bash
