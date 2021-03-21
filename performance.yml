@@ -1,0 +1,56 @@
+  config:
+    target: "https://api.todoist.com/rest/v1"
+    phases:
+      - duration: 10
+        arrivalRate: 3
+        name: "Phase 1"
+    defaults:
+      headers:
+       Authorization: Bearer {{ $processEnvironment.TOKEN }}
+       Content-type: application/json
+    processor: "./my-function.js"
+    payload:
+      path: "project.csv"
+      fields:
+       - "projectId"
+      skipHeader: true
+  scenarios:
+    - flow:
+        - get:
+            url: "/tasks"
+        - function: "generateRandomData"
+        - post:
+            url: "/tasks"
+            json:
+             id: 2995104339
+             content: "{{ fake_task }}"
+             comment_count: 0
+             completed: false
+             order: 1
+             priority: 1
+             # NOTE:
+             project_id: "{{ projectId }}"
+             # Change project_id to the value where you want to create the tasks, this is in file project.csv
+             section_id: 0
+             parent_id: 0
+             url: "https://todoist.com/showTask?id=2995104339"
+            capture:
+             json: "$.id"
+             as: "taskId"
+        - log: "Created task {{ fake_task }} with taskId: {{ taskId }}"
+        - get:
+            url: "/tasks/{{ taskId }}"
+        - post:
+            url: "/tasks/{{ taskId }}"
+            json:
+             due_string: "tomorrow"
+             content: "{{ fake_task }} renamed"
+        - log: "Renamed task {{ fake_task }} with taskId: {{ taskId }}"
+        - post:
+            url: "/tasks/{{ taskId }}/close"
+        - post:
+            url: "/tasks/{{ taskId }}/reopen"
+        #- delete:
+            #url: "/tasks/{{ taskId }}"
+
+  
